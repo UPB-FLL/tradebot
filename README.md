@@ -51,8 +51,47 @@ The app is fully static + client-side:
   equity curve, spot overlay, P/L stats, and a full trade log.
 - **Train tab** — configure Q-learning hyperparameters, watch episode-by-
   episode progress, then hop back to Backtest and flip “Use trained agent”.
+- **Live (Alpaca) tab** — read the connected account, list positions, find
+  near-the-money call contracts, and place guarded paper orders.
 - Adjustable market params (drift, vol, seed, days), options params (DTE,
   strike offset, IV, r), and broker frictions (commission, slippage).
+
+### Connecting a brokerage (Alpaca)
+
+> **Why Alpaca and not Robinhood?** Robinhood has no official public API.
+> Using the reverse-engineered one violates their ToS and stores your
+> username/password on the server, which is not something I'm going to wire
+> up on a public Vercel URL. Alpaca issues real API keys, has a free paper-
+> trading account with real market data, and supports options — which is
+> exactly what this project needs.
+
+1. Create a free account at [alpaca.markets](https://alpaca.markets/) and
+   grab a **paper** key ID + secret from the dashboard.
+2. Set them as environment variables:
+   - **Local:** copy `.env.local.example` to `.env.local` and fill in.
+   - **Vercel:** Project → Settings → Environment Variables → add
+     `ALPACA_KEY_ID` and `ALPACA_SECRET_KEY` (scope: Production + Preview).
+     Redeploy.
+3. The **Live (Alpaca)** tab will light up and start showing account status.
+
+All broker traffic is proxied through server-only Next.js Route Handlers
+under `/api/broker/*`. Keys never leave the server. The order endpoint
+additionally requires the literal phrase `I UNDERSTAND` in the request body
+and enforces a server-side `ALPACA_MAX_QTY` cap (default 10).
+
+### Going live (real money — read first)
+
+The paper endpoint (`https://paper-api.alpaca.markets`, the default) uses
+fake money. To point at the live endpoint you must set **both**:
+
+```
+ALPACA_BASE_URL=https://api.alpaca.markets
+ALPACA_ALLOW_LIVE=true
+```
+
+Missing either flag keeps you on paper. The UI clearly labels the active
+endpoint as `PAPER` or `LIVE`. Treat live-mode deploys like production:
+separate Vercel project, restricted team access, and a small `ALPACA_MAX_QTY`.
 
 ---
 

@@ -22,8 +22,9 @@ import {
 import { syntheticSeries, type PriceSeries } from "@/lib/data";
 import { OptionsEnv, type EnvConfig } from "@/lib/env";
 import { RsiStrategy } from "@/lib/strategy";
+import LivePanel from "./LivePanel";
 
-type Tab = "backtest" | "train";
+type Tab = "backtest" | "train" | "live";
 
 interface Controls {
   ticker: string;
@@ -515,6 +516,12 @@ export default function Dashboard() {
           >
             Train
           </button>
+          <button
+            className={`tab ${tab === "live" ? "active" : ""}`}
+            onClick={() => setTab("live")}
+          >
+            Live (Alpaca)
+          </button>
         </div>
 
         {tab === "backtest" && (
@@ -743,6 +750,13 @@ export default function Dashboard() {
               </p>
             </div>
           </>
+        )}
+
+        {tab === "live" && (
+          <LivePanel
+            defaultUnderlying={controls.ticker === "SYN" ? "SPY" : controls.ticker}
+            defaultOffsetPct={controls.strikeOffset}
+          />
         )}
       </main>
     </div>
