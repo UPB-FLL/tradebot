@@ -1,0 +1,44 @@
+# Default tradebot configuration.
+# Everything here drives a simulation — no real brokerage is ever contacted.
+
+simulation:
+  starting_cash: 100000.0
+  commission_per_contract: 0.65   # $ per option contract
+  slippage_bps: 5                 # basis points applied to fills
+  contract_multiplier: 100        # one options contract = 100 shares
+
+market:
+  ticker: SPY
+  start: "2020-01-01"
+  end: "2024-12-31"
+  use_synthetic_if_offline: true  # fall back to GBM-simulated prices
+
+options:
+  risk_free_rate: 0.045
+  implied_volatility: 0.22        # flat IV assumption for pricing
+  dte_days: 30                    # days-to-expiration used for fresh calls
+  strike_offset_pct: 0.02         # buy 2% OTM calls by default
+
+training:
+  episodes: 200
+  gamma: 0.97
+  alpha: 0.1
+  epsilon_start: 1.0
+  epsilon_end: 0.05
+  epsilon_decay: 0.995
+  seed: 42
+  # state discretization bins
+  rsi_bins: [30, 50, 70]
+  ret_bins: [-0.02, 0.0, 0.02]
+  pos_bins: [0, 1]  # no position / holding call
+
+strategy:
+  # used by backtest when --agent path is not provided
+  rsi_buy_below: 35
+  rsi_sell_above: 65
+  take_profit_pct: 0.25
+  stop_loss_pct: 0.20
+
+paths:
+  model_dir: runs
+  data_cache: data/cache
